@@ -1,0 +1,29 @@
+# Virtual Consistency Editing
+torchlibrosa==0.1.0
+pytorch-lightning
+pytorch_memlab
+jupyter==1.0.0
+icecream
+torchmetrics==0.11.4
+huggingface_hub==0.20.2
+calmsize
+librosa #==0.9.2
+taming-transformers-rom1504 
+einops
+omegaconf
+importlib_resources
+sentencepiece
+torchaudio
+diffusers==0.30.0
+transformers==4.44.0
+numpy==1.26.4       # issues with metrics when using more recent versions
+
+# EVAL metrics
+laion_clap
+nnAudio==0.3.3
+julius
+mad_metric
+audiobox_aesthetics
+muq
+resampy==0.4.3
+scipy==1.15.2

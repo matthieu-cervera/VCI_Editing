@@ -1,0 +1,56 @@
+VCI_AudioLCM:
+  nb_consistency_steps: 8
+  phi: 0.8
+  attention_control: false
+  thresh_m: 0.5
+  thresh_e: 0.1
+  tau_s: 0.4
+  tau_c: 0.8
+  cfg: 1.0
+  src_cfg: 1.0
+
+VCI_AudioLDM:
+  nb_consistency_steps: 8
+  phi: 0.7
+  attention_control: false
+  thresh_m: 0.515
+  thresh_e: 0.1
+  tau_s: 0.432
+  tau_c: 0.873
+  cfg: 2.0
+  src_cfg: 1.0
+
+VCI_AudioLDM2:
+  nb_consistency_steps: 20
+  phi: 0.82
+  attention_control: false
+  thresh_m: 0.3
+  thresh_e: 0.3
+  tau_s: 0.3
+  tau_c: 0.3
+  cfg: 20.0
+  src_cfg: 1.0
+
+ZETA:
+  eta: 1.0
+  cfg: 12.0
+  src_cfg: 3.0
+  tstart: 80
+  num_inference_steps: 200
+  mode: ours
+
+DDIM:
+  eta: 1.0
+  cfg: 5.0
+  src_cfg: 3.0
+  tstart: 100
+  num_inference_steps: 200
+  mode: ddim
+
+SDEDIT:
+  eta: 1.0
+  cfg: 12.0
+  src_cfg: 3.0
+  tstart: 90
+  num_inference_steps: 200
+  mode: sdedit
