@@ -30,6 +30,7 @@ python -m pip install audiocraft
 We provide an example of how you can quickly edit an audio sample:
 
 ```python
+import torch
 from InferenceLCM import VCI_Edit, load_wrapper
 from util import set_reproducability
 
@@ -58,7 +59,7 @@ Use the `edit_main_run.py` script to generate multiple audio edits given a batch
 python edit_main_run.py --audio_set="MedleyDB/audio" 
                         --results_dir="MedleyDB/edited" 
                         --prompts="MedleyDB/MedleyDB.csv" 
-                        --model_name="AudioLDM2" 
+                        --model_name="VCI_AudioLDM2" 
                         --hparams="hparams_edit.yaml 
 ```
 
@@ -77,7 +78,7 @@ python eval_main_run.py --audio_set="MedleyDB/audio"
 
 You should use the `--long_excerpts` argument if you're evaluating audios that are >10s.
 
-### Supplementary Information
+## Supplementary Information
 
 You can run VCI using *AudioLDM2*, *AudioLDM* and *AudioLCM*. We recommend using *AudioLDM2*. <br>
 <sub>For *AudioLCM*, you need to download the weights from [Huggingface](https://huggingface.co/liuhuadai/AudioLCM) (`audiolcm.ckpt`, `epoch=000032.ckpt`, `maa2.ckpt`, `BigVGAN vocoder`, `t5-v1_1-large`, `bert-base-uncased`, `CLAP_weights_2022.pth`).</sub>
