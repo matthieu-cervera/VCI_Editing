@@ -47,7 +47,7 @@ wrapper, device = load_wrapper(model_type)
 with torch.no_grad():
     audio_edited, edited_path = VCI_Edit(wrapper, audio_input, source_prompt, target_prompt, 
                                         local="", mutual="", wav_name="trumpet", 
-                                        nb_consistency_steps=20, results_dir="edited", 
+                                        nb_consistency_steps=20, result_dir="edited", 
                                         phi=torch.Tensor([0.82]).to(device), guidance_scale=20.0)  
 ```
 
