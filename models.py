@@ -10,8 +10,8 @@ from util import logger
 from omegaconf import OmegaConf
 from ldm.util import instantiate_from_config
 from ldm.modules.diffusionmodules.util import make_beta_schedule
-from attention_control import AttentionControlLCM, AttentionControlLDM, AttentionControlLDM2
-import seq_aligner
+# from attention_control import AttentionControlLCM, AttentionControlLDM, AttentionControlLDM2
+# import seq_aligner
 import torchaudio
 
 class PromptEmbeddings(NamedTuple):
@@ -186,49 +186,49 @@ class AudioLCMWrapper(ModelWrapper):
     def unet_forward(self, x, t, c, w):
         return self.model.apply_model(x, t, c, self.model.unet, w_cond=w)
     
-    def set_attention_control(self, input_audio, Tshape, source_prompt, target_prompt, local, mutual, nb_consistency_steps, 
-                              thresh_e, thresh_m, tau_s, tau_c, compute_second_mask=False):
+    # def set_attention_control(self, input_audio, Tshape, source_prompt, target_prompt, local, mutual, nb_consistency_steps, 
+    #                           thresh_e, thresh_m, tau_s, tau_c, compute_second_mask=False):
         
-        text_encoder = self.model.cond_stage_model.t5_transformer
-        text_tokenizer = self.model.cond_stage_model.t5_tokenizer
-        clap_encoder = self.model.cond_stage_model.caption_encoder
-        clap_tokenizer = self.model.cond_stage_model.clap_tokenizer
+    #     text_encoder = self.model.cond_stage_model.t5_transformer
+    #     text_tokenizer = self.model.cond_stage_model.t5_tokenizer
+    #     clap_encoder = self.model.cond_stage_model.caption_encoder
+    #     clap_tokenizer = self.model.cond_stage_model.clap_tokenizer
 
-        source_prompt = dict(ori_caption=source_prompt,struct_caption=f'<{source_prompt}& all>')
-        target_prompt = dict(ori_caption=target_prompt,struct_caption=f'<{target_prompt}& all>')
+    #     source_prompt = dict(ori_caption=source_prompt,struct_caption=f'<{source_prompt}& all>')
+    #     target_prompt = dict(ori_caption=target_prompt,struct_caption=f'<{target_prompt}& all>')
 
 
-        try:
-            mapper,alphas, ms, alpha_e, alpha_m= seq_aligner.get_refinement_mapper([source_prompt["ori_caption"], target_prompt["ori_caption"]],
-                                                                                [[local, mutual]], text_tokenizer, text_encoder, self.device)
+    #     try:
+    #         mapper,alphas, ms, alpha_e, alpha_m= seq_aligner.get_refinement_mapper([source_prompt["ori_caption"], target_prompt["ori_caption"]],
+    #                                                                             [[local, mutual]], text_tokenizer, text_encoder, self.device)
             
-            mapper_clap,alphas_clap, ms_clap, alpha_e_clap, alpha_m_clap= seq_aligner.get_refinement_mapper([source_prompt["ori_caption"], target_prompt["ori_caption"]],
-                                                                                [[local, mutual]], clap_tokenizer, clap_encoder, self.device, encoder_type="CLAP")
+    #         mapper_clap,alphas_clap, ms_clap, alpha_e_clap, alpha_m_clap= seq_aligner.get_refinement_mapper([source_prompt["ori_caption"], target_prompt["ori_caption"]],
+    #                                                                             [[local, mutual]], clap_tokenizer, clap_encoder, self.device, encoder_type="CLAP")
 
-            w_blended_src = torch.cat([alpha_m, alpha_m_clap], dim=1).squeeze(0)
-            w_blended_tgt = torch.cat([alpha_e, alpha_e_clap], dim=1).squeeze(0)
-            mapper = torch.cat([mapper, mapper_clap + self.model.cond_stage_model.max_length], dim=1)
-            alignment_fn = mapper.squeeze(0).tolist()
-            local_blend = AttentionControlLCM.LocalBlend(thresh_e=thresh_e, thresh_m=thresh_m, compute_second_mask=compute_second_mask, save_inter=False)
-            alphas = torch.cat([alphas, alphas_clap], dim=1).squeeze(0)
-            ms = torch.cat([ms, ms_clap], dim=1).squeeze(0)
-            local_blend.set_map(ms,alphas,w_blended_tgt,w_blended_src,154)  
+    #         w_blended_src = torch.cat([alpha_m, alpha_m_clap], dim=1).squeeze(0)
+    #         w_blended_tgt = torch.cat([alpha_e, alpha_e_clap], dim=1).squeeze(0)
+    #         mapper = torch.cat([mapper, mapper_clap + self.model.cond_stage_model.max_length], dim=1)
+    #         alignment_fn = mapper.squeeze(0).tolist()
+    #         local_blend = AttentionControlLCM.LocalBlend(thresh_e=thresh_e, thresh_m=thresh_m, compute_second_mask=compute_second_mask, save_inter=False)
+    #         alphas = torch.cat([alphas, alphas_clap], dim=1).squeeze(0)
+    #         ms = torch.cat([ms, ms_clap], dim=1).squeeze(0)
+    #         local_blend.set_map(ms,alphas,w_blended_tgt,w_blended_src,154)  
 
-        except Exception as e:
-            logger.info(f"Exception during blended words computing : {e}")
-            alignment_fn = [i for i in range(154)]
-            w_blended_src = torch.zeros((154))
-            w_blended_tgt = torch.zeros((154))
-            local_blend = None 
+    #     except Exception as e:
+    #         logger.info(f"Exception during blended words computing : {e}")
+    #         alignment_fn = [i for i in range(154)]
+    #         w_blended_src = torch.zeros((154))
+    #         w_blended_tgt = torch.zeros((154))
+    #         local_blend = None 
 
-        print("-------Building attention controller---------")
-        controller = AttentionControlLCM.AttentionManipulator(input_audio, tau_s=tau_s, tau_c= tau_c, total_steps=nb_consistency_steps, alignment_fn=alignment_fn, 
-                                          T_shape=Tshape, w_blended_src=w_blended_src, w_blended_tgt=w_blended_tgt)
+    #     print("-------Building attention controller---------")
+    #     controller = AttentionControlLCM.AttentionManipulator(input_audio, tau_s=tau_s, tau_c= tau_c, total_steps=nb_consistency_steps, alignment_fn=alignment_fn, 
+    #                                       T_shape=Tshape, w_blended_src=w_blended_src, w_blended_tgt=w_blended_tgt)
         
-        print("-------passing controller into unet---------")
-        AttentionControlLCM.register_attention_control(self.model, controller)
+    #     print("-------passing controller into unet---------")
+    #     AttentionControlLCM.register_attention_control(self.model, controller)
 
-        return controller, local_blend
+    #     return controller, local_blend
 
 
 class AudioLDMWrapper(ModelWrapper):
@@ -339,32 +339,32 @@ class AudioLDMWrapper(ModelWrapper):
         return self.model.unet(x, t, encoder_hidden_states=None, class_labels=class_labels).sample
     
     
-    def set_attention_control(self, input_audio, Tshape, source_prompt, target_prompt, local, mutual, nb_consistency_steps, thresh_e, thresh_m, tau_s, tau_c, compute_second_mask=False):
-        print("------- building attention controller ---------")
-        try:
-            local_blend = AttentionControlLDM.LocalBlend(thresh_e=thresh_e, thresh_m=thresh_m, save_inter=False)
-            cross_replace_steps=tau_c
-            self_replace_steps=tau_s
+    # def set_attention_control(self, input_audio, Tshape, source_prompt, target_prompt, local, mutual, nb_consistency_steps, thresh_e, thresh_m, tau_s, tau_c, compute_second_mask=False):
+    #     print("------- building attention controller ---------")
+    #     try:
+    #         local_blend = AttentionControlLDM.LocalBlend(thresh_e=thresh_e, thresh_m=thresh_m, save_inter=False)
+    #         cross_replace_steps=tau_c
+    #         self_replace_steps=tau_s
 
-            controller = AttentionControlLDM.AttentionRefine([source_prompt, target_prompt],[[local, mutual]],
-                            nb_consistency_steps,
-                            0,
-                            cross_replace_steps=cross_replace_steps,
-                            self_replace_steps=self_replace_steps,
-                            tokenizer=self.model.tokenizer,
-                            encoder = self.model.text_encoder,
-                            local_blend=local_blend
-                            )
-            print("------- passing controller into unet ---------")
-            AttentionControlLDM.register_attention_control(self.model, controller)
-        except Exception as e:
-            print(f"------- error during attention control set-up : {e} ---------")
-            controller, local_blend = None, None
+    #         controller = AttentionControlLDM.AttentionRefine([source_prompt, target_prompt],[[local, mutual]],
+    #                         nb_consistency_steps,
+    #                         0,
+    #                         cross_replace_steps=cross_replace_steps,
+    #                         self_replace_steps=self_replace_steps,
+    #                         tokenizer=self.model.tokenizer,
+    #                         encoder = self.model.text_encoder,
+    #                         local_blend=local_blend
+    #                         )
+    #         print("------- passing controller into unet ---------")
+    #         AttentionControlLDM.register_attention_control(self.model, controller)
+    #     except Exception as e:
+    #         print(f"------- error during attention control set-up : {e} ---------")
+    #         controller, local_blend = None, None
 
-        return controller, local_blend
+    #     return controller, local_blend
     
-    def remove_attention_control(self):
-        AttentionControlLDM.unregister_attention_control(self.model)
+    # def remove_attention_control(self):
+    #     AttentionControlLDM.unregister_attention_control(self.model)
     
 
 class AudioLDM2Wrapper(ModelWrapper):
@@ -517,34 +517,34 @@ class AudioLDM2Wrapper(ModelWrapper):
 
     
     
-    def set_attention_control(self, input_audio, Tshape, source_prompt, target_prompt, local, mutual, nb_consistency_steps, thresh_e, thresh_m, tau_s, tau_c, compute_second_mask=False):
-        print("-------Building attention controller---------")
-        try:
-            local_blend = AttentionControlLDM2.LocalBlend(thresh_e=thresh_e, thresh_m=thresh_m, save_inter=False)
-            cross_replace_steps=tau_c/nb_consistency_steps
-            self_replace_steps=tau_s/nb_consistency_steps
+    # def set_attention_control(self, input_audio, Tshape, source_prompt, target_prompt, local, mutual, nb_consistency_steps, thresh_e, thresh_m, tau_s, tau_c, compute_second_mask=False):
+    #     print("-------Building attention controller---------")
+    #     try:
+    #         local_blend = AttentionControlLDM2.LocalBlend(thresh_e=thresh_e, thresh_m=thresh_m, save_inter=False)
+    #         cross_replace_steps=tau_c/nb_consistency_steps
+    #         self_replace_steps=tau_s/nb_consistency_steps
 
-            controller = AttentionControlLDM2.AttentionRefine([source_prompt, target_prompt],[[local, mutual]],
-                            nb_consistency_steps,
-                            0,
-                            cross_replace_steps=cross_replace_steps,
-                            self_replace_steps=self_replace_steps,
-                            tokenizer=self.model.tokenizer_2,
-                            encoder = self.model.text_encoder_2,
-                            clap_tokenizer=self.model.tokenizer,
-                            clap_encoder=self.model.text_encoder,
-                            local_blend=local_blend,
+    #         controller = AttentionControlLDM2.AttentionRefine([source_prompt, target_prompt],[[local, mutual]],
+    #                         nb_consistency_steps,
+    #                         0,
+    #                         cross_replace_steps=cross_replace_steps,
+    #                         self_replace_steps=self_replace_steps,
+    #                         tokenizer=self.model.tokenizer_2,
+    #                         encoder = self.model.text_encoder_2,
+    #                         clap_tokenizer=self.model.tokenizer,
+    #                         clap_encoder=self.model.text_encoder,
+    #                         local_blend=local_blend,
 
-                            )
-            print("-------passing controller into unet---------")
-            AttentionControlLDM2.register_attention_control(self.model, controller)
-        except Exception as e:
-            print(f"-------error during attention control set-up : {e}---------")
-            controller, local_blend = None, None
+    #                         )
+    #         print("-------passing controller into unet---------")
+    #         AttentionControlLDM2.register_attention_control(self.model, controller)
+    #     except Exception as e:
+    #         print(f"-------error during attention control set-up : {e}---------")
+    #         controller, local_blend = None, None
 
-        return controller, local_blend
+    #     return controller, local_blend
     
-    def remove_attention_control(self):
-        AttentionControlLDM2.unregister_attention_control(self.model)
+    # def remove_attention_control(self):
+    #     AttentionControlLDM2.unregister_attention_control(self.model)
     
    

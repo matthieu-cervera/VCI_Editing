@@ -98,14 +98,14 @@ def load_wrapper(model_type, model_id=None):
 
 def VCI_Edit(wrapper, input_path, source_prompt, target_prompt, local=None, mutual=None, wav_name="test",
              result_dir = "results", nb_consistency_steps=8, save_wav=True, phi=None,
-                guidance_scale=1.0, src_guidance_scale=1.0, attention_control=False,
+                guidance_scale=1.0, src_guidance_scale=1.0, #attention_control=False,
              thresh_e=0.3, thresh_m=0.5, tau_s=0.7, tau_c=0.7, clap=None, nb=""):
   
     wrapper.register_schedule()
 
     input_audio, Tshape = wrapper.wav_to_mel(input_path)
 
-    if attention_control:
+    if False: #attention_control:
         controller, local_blend = wrapper.set_attention_control(input_audio, Tshape, source_prompt, target_prompt, local, mutual, nb_consistency_steps, 
                                                                 thresh_e=thresh_e, thresh_m=thresh_m, tau_s=tau_s, tau_c=tau_c) 
 

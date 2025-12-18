@@ -85,17 +85,17 @@ You can run VCI using *AudioLDM2*, *AudioLDM* and *AudioLCM*. We recommend using
 
 
 ## Acknowledgements
-This implementation is heavily based on code from [AudioLCM](https://github.com/Text-to-Audio/AudioLCM), [InfEdit](https://github.com/sled-group/InfEdit), [ZETA](https://github.com/HilaManor/AudioEditingCode) and [AudioLDM2](https://github.com/haoheliu/AudioLDM2). We'd like to thank them for their contributions.
+This implementation is heavily based or inspired by code from [AudioLCM](https://github.com/Text-to-Audio/AudioLCM), [InfEdit](https://github.com/sled-group/InfEdit), [ZETA](https://github.com/HilaManor/AudioEditingCode) and [AudioLDM2](https://github.com/haoheliu/AudioLDM2). We'd like to thank them for their contributions.
 
 ### Datasets
-Thanks to previous work (Liu et al. ; Bittner et al. ; Manor et al. ) , we used [ZoME Bench](https://huggingface.co/datasets/liuhuadai/ZoME-Bench) dataset and [MedleyDB](https://medleydb.weebly.com/), [MedleyMDprompts](https://github.com/HilaManor/AudioEditingCode/tree/codeclean/MedleyMDPrompts) audios and prompts.
+Thanks to previous work (Liu et al. ; Bittner et al. ; Manor et al. ) , we used [ZoME Bench](https://huggingface.co/datasets/liuhuadai/ZoME-Bench) dataset(Academic Free License v3.0) and [MedleyDB](https://medleydb.weebly.com/), [MedleyMDprompts](https://github.com/HilaManor/AudioEditingCode/tree/codeclean/MedleyMDPrompts) (Attribution 4.0 International License) audios and prompts.
 
 
 ### Eval
 The eval part uses code from the following Github repos:
-[CLAP](https://github.com/LAION-AI/CLAP),
-[facebookresearch/audiocraft](https://github.com/facebookresearch/audiocraft),
-[Audiobox](https://github.com/facebookresearch/audiobox-aesthetics),
-[FAD](https://github.com/gudgud96/frechet-audio-distance/blob/main/frechet_audio_distance/fad.py),
-[MuLanQ](https://github.com/tencent-ailab/MuQ),
-[CQT - nnAudio](https://github.com/KinWaiCheuk/nnAudio).
+[CLAP](https://github.com/LAION-AI/CLAP) (CC0 1.0 Universal License),
+[facebookresearch/audiocraft](https://github.com/facebookresearch/audiocraft) (MIT License),
+[Audiobox](https://github.com/facebookresearch/audiobox-aesthetics) (Attribution 4.0 International License),
+[FAD](https://github.com/gudgud96/frechet-audio-distance/blob/main/frechet_audio_distance/fad.py) (MIT License),
+[MuLanQ](https://github.com/tencent-ailab/MuQ) (MIT License),
+[CQT - nnAudio](https://github.com/KinWaiCheuk/nnAudio) (MIT License).
